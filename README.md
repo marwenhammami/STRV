@@ -12,12 +12,12 @@ Installation
 ============
 For Genymotion:
 * Drag and drop the apk file into Genymotion emulator.
+
 For other emulators:
-* Install Android SDK.
-* Start the emulator by going to $SDK_root/emulator.exe.
-* Go to command prompt and go to the directory $SDK_root/platform-tools (or else add the path to windows environment)
-* Type in the command adb install.
-* Bingo. Your app should be up and running on the emulator.
+* Copy the apk file to platform-tools in android-sdk linux folder.
+* Open Terminal and navigate to platform-tools folder in android-sdk.
+* Then Execute this command ./adb install FileName.apk
+* If the operation is successful (the result is displayed on the screen), then you will find your file in the launcher of your emulator.
 
 Usage
 =====
