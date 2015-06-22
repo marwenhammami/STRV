@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="text_color">@android:color/white</color>
+    <color name="drawer_color">@android:color/white</color>
+    <color name="weather_details_color">@android:color/white</color>
+    <color name="forecast_list_color">@android:color/white</color>
+    <color name="banner_color">#2196F3</color>
+</resources>

@@ -1,0 +1,104 @@
+final VERSION_MAJOR = 1
+final VERSION_MINOR = 0
+final VERSION_PATCH = 0
+final VERSION_BUILD = 0
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "23.0.0 rc2"
+
+    defaultConfig {
+        applicationId "com.marouenhammami.weather.android"
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode VERSION_MAJOR * 10000000 + VERSION_MINOR * 100000 + VERSION_PATCH * 1000 + VERSION_BUILD
+        versionName "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
+    }
+    signingConfigs
+            {
+
+                release
+                        {
+                            keyAlias ''
+                            keyPassword ''
+                            storeFile file('extras/keystore/weather.jks')
+                            storePassword ''
+                        }
+            }
+
+    buildTypes {
+        release {
+            buildConfigField "boolean", "LOGS", "false"
+            buildConfigField "boolean", "DEV_API", "false"
+            zipAlignEnabled true
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    applicationVariants.all
+            {
+                variant ->
+                    if (variant.buildType.name.equals("release")) {
+                        variant.outputs.each
+                                {
+                                    output ->
+                                        def outputFile = output.outputFile
+                                        def date = new Date()
+                                        if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                                            def fileName = outputFile.name.replace(
+                                                    "app-release",
+                                                    "weather-" + defaultConfig.versionName + "-" + defaultConfig.versionCode + "-" + date.format('yyyyMMdd'))
+                                            output.outputFile = new File((String) outputFile.parent, (String) fileName)
+                                        }
+                                }
+                    }
+            }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.2.0'
+}
+
+
+
+
+task askForPasswords <<
+        {
+            def storePass
+            def keyAlias
+            def keyPass
+
+            def keystorePropertiesFile = new File('extras/keystore/weather.properties')
+
+            if (keystorePropertiesFile.exists()) {
+                println "Loading keystore passwords from property file..."
+                Properties properties = new Properties()
+                properties.load(new FileInputStream(keystorePropertiesFile))
+                storePass = properties['keystore.store.password']
+                keyAlias = properties['keystore.key.alias']
+                keyPass = properties['keystore.key.password']
+            } else {
+                println "Getting keystore passwords from user input..."
+                storePass = new String(System.console().readPassword("\nStore password: "))
+                keyAlias = new String(System.console().readLine("Key alias: "))
+                keyPass = new String(System.console().readPassword("Key password: "))
+            }
+
+            android.signingConfigs.release.storePassword = storePass
+            android.signingConfigs.release.keyAlias = keyAlias
+            android.signingConfigs.release.keyPassword = keyPass
+        }
+
+
+tasks.whenTaskAdded
+        {
+            theTask ->
+                if (theTask.name.equals("packageRelease")) {
+                    theTask.dependsOn "askForPasswords"
+                }
+        }
